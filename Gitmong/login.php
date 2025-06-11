@@ -16,9 +16,6 @@ if (isset($_SESSION['username'])) {
 </head>
 <body class="bg-gray-900 text-white h-screen flex items-center justify-center">
   <div class="w-full max-w-sm">
-    <div class="flex justify-center mb-6">
-      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" class="w-12">
-    </div>
     <form class="bg-gray-800 p-6 rounded shadow" action="signin.php" method="post">
       <h2 class="text-center text-xl mb-4">Sign in to GitHub</h2>
       <label class="block text-sm mb-2" for="username">Username or email address</label>
