@@ -1,93 +1,41 @@
 <?php
-session_start();
-if (!isset($_SESSION['login'])) {
-    header("Location: login.php");
-    exit;
+session_start(); if (!isset($_SESSION['login'])) { header("Location:login.php"); exit; }
+include '../koneksi.php';
+if (isset($_GET['nim'])) {
+    $n=$_GET['nim'];
+    $r=mysqli_query($conn,"SELECT * FROM mahasiswa WHERE nim='$n'");
+    $m=mysqli_num_rows($r)==1?mysqli_fetch_assoc($r):null;
+    if (!$m) { echo "Data tidak ditemukan."; exit; }
+}
+if (isset($_POST['submit'])) {
+    $n=$_POST['nim']; $nm=$_POST['nama']; $pr=$_POST['prodi']; $sm=$_POST['semester']; $em=$_POST['email'];
+    $q="UPDATE mahasiswa SET nama='$nm',prodi='$pr',semester='$sm',email='$em' WHERE nim='$n'";
+    mysqli_query($conn,$q);
+    header("Location:../index.php"); exit;
 }
 ?>
-
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <title>Edit Mahasiswa</title>
-  <link rel="stylesheet" href="../css/style.css">
-</head>
-<body>
-
-  <div class="container">
-    <h1>Edit Mahasiswa</h1>
-
-    <?php
-    include '../koneksi.php';
-
-    if (isset($_GET['nim'])) {
-      $nim = $_GET['nim'];
-      $mahasiswa = getMahasiswa($nim);
-
-      if ($mahasiswa) {
-    ?>
-
-    <form action="edit.php?nim=<?php echo $nim; ?>" method="POST">
-      <label for="nim">NIM</label>
-      <input type="text" id="nim" name="nim" value="<?php echo htmlspecialchars($mahasiswa['nim']); ?>" readonly>
-
-      <label for="nama">Nama</label>
-      <input type="text" id="nama" name="nama" value="<?php echo htmlspecialchars($mahasiswa['nama']); ?>" required>
-
-      <label for="prodi">Program Studi</label>
-        <select id="prodi" name="prodi" required>
-          <option value="">-- Pilih Program Studi --</option>
-          <option value="Teknik Informatika" <?php if($mahasiswa['prodi'] == "Teknik Informatika") echo "selected"; ?>>Teknik Informatika</option>
-          <option value="Sistem Informasi" <?php if($mahasiswa['prodi'] == "Sistem Informasi") echo "selected"; ?>>Sistem Informasi</option>
-          <option value="Ilmu Komunikasi" <?php if($mahasiswa['prodi'] == "Ilmu Komunikasi") echo "selected"; ?>>Ilmu Komunikasi</option>
-          <option value="Pariwisata" <?php if($mahasiswa['prodi'] == "Pariwisata") echo "selected"; ?>>Pariwisata</option>
-        </select>
-
-      <label for="semester">Semester</label>
-        <select id="semester" name="semester" required>
-          <option value="" disabled>-- Pilih Semester --</option>
-          <?php
-            for ($i = 1; $i <= 14; $i++) {
-              $selected = ($mahasiswa['semester'] == $i) ? 'selected' : '';
-              echo "<option value=\"$i\" $selected>$i</option>";
-            }
-          ?>
-        </select>
-
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($mahasiswa['email']); ?>" required>
-
-      <div style="display: flex; gap: 10px;">
-        <button type="submit" name="submit" class="button">Update</button>
-        <a href="../index.php" class="button btn-danger">Cancel</a>
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Edit Mahasiswa</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
+    <h1 class="text-2xl font-semibold mb-6 text-gray-800">Edit Mahasiswa</h1>
+    <form method="POST">
+      <label class="block mb-1 text-gray-700">NIM</label><input type="text" name="nim" value="<?php echo htmlspecialchars($m['nim']) ?>" readonly class="w-full mb-4 px-3 py-2 border rounded bg-gray-100">
+      <label class="block mb-1 text-gray-700">Nama</label><input type="text" name="nama" value="<?php echo htmlspecialchars($m['nama']) ?>" required class="w-full mb-4 px-3 py-2 border rounded">
+      <label class="block mb-1 text-gray-700">Program Studi</label><select name="prodi" required class="w-full mb-4 px-3 py-2 border rounded">
+        <option value="">-- Pilih Program Studi --</option>
+        <?php foreach(['Teknik Informatika','Sistem Informasi','Ilmu Komunikasi','Pariwisata'] as $prg): ?>
+          <option <?php echo $m['prodi']==$prg?'selected':'' ?>><?php echo $prg ?></option>
+        <?php endforeach; ?>
+      </select>
+      <label class="block mb-1 text-gray-700">Semester</label><select name="semester" required class="w-full mb-4 px-3 py-2 border rounded">
+        <?php for($i=1;$i<=14;$i++): ?>
+          <option value="<?php echo $i ?>" <?php echo $m['semester']==$i?'selected':'' ?>><?php echo $i ?></option>
+        <?php endfor; ?>
+      </select>
+      <label class="block mb-1 text-gray-700">Email</label><input type="email" name="email" value="<?php echo htmlspecialchars($m['email']) ?>" required class="w-full mb-6 px-3 py-2 border rounded">
+      <div class="flex gap-4">
+        <button type="submit" name="submit" class="flex-1 bg-gray-800 text-white py-2 rounded hover:bg-gray-700 transition">Update</button>
+        <a href="../index.php" class="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 text-center">Cancel</a>
       </div>
     </form>
-
-    <?php
-      } else {
-        echo "<p>Data tidak ditemukan.</p>";
-      }
-    }
-
-    if (isset($_POST['submit'])) {
-      $nim = $_POST['nim'];
-      $nama = $_POST['nama'];
-      $prodi = $_POST['prodi'];
-      $semester = $_POST['semester'];
-      $email = $_POST['email'];
-
-      if (updateMahasiswa($nim, $nama, $prodi, $semester, $email)) {
-        echo "<p>Data berhasil diupdate.</p>";
-        header("Location: ../index.php"); // Redirect ke halaman index
-        exit;
-      } else {
-        echo "<p>Gagal mengupdate data.</p>";
-      }
-    }
-    ?>
-
   </div>
-
-</body>
-</html>
+</body></html>
