@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../koneksi.php';
+include 'koneksi.php';
 if (isset($_COOKIE['remember_me']) && !isset($_SESSION['login'])) {
     $t = $_COOKIE['remember_me'];
     $r = mysqli_query($conn, "SELECT id,username FROM users WHERE remember_token='$t'");
@@ -25,7 +25,7 @@ if (isset($_POST['login'])) {
             setcookie('remember_me','',time()-3600,'/');
             mysqli_query($conn,"UPDATE users SET remember_token=NULL WHERE id='{$user['id']}'");
         }
-        header("Location:../index.php"); exit;
+        header("Location:index.php"); exit;
     }
     $error="Username atau password salah!";
 }

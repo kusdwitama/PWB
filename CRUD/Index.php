@@ -51,7 +51,7 @@ $data = mysqli_query($conn, "SELECT * FROM mahasiswa $whereSql LIMIT $offset, $l
             <div class="space-x-2">
                 <a href="controller/action/tambah.php" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Tambah</a>
                 <button onclick="showPrintOptions()" class="bg-gray-800 text-white text-sm px-4 py-2 rounded hover:bg-gray-700">Print</button>
-                <a href="controller/logout.php" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Logout</a>
+                <a href="logout.php" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Logout</a>
             </div>
         </div>
 
