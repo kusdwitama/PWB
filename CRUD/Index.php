@@ -8,7 +8,7 @@ if (!isset($_SESSION['login'])) {
 include 'koneksi.php';
 
 // Pagination setup
-$limit = 5;
+$limit = 7;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
@@ -107,8 +107,8 @@ $data = mysqli_query($conn, "SELECT * FROM mahasiswa $whereSql LIMIT $offset, $l
                             <td class="p-3"><?php echo $row['semester']; ?></td>
                             <td class="p-3"><?php echo $row['email']; ?></td>
                             <td class="p-3 flex gap-2" onclick="event.stopPropagation()">
-                                <a href="edit.php?nim=<?php echo $row['nim']; ?>" class="bg-gray-800 text-white px-3 py-1 rounded hover:bg-gray-700">Edit</a>
-                                <a href="hapus.php?nim=<?php echo $row['nim']; ?>" onclick="return confirm('Yakin hapus data ini?')" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Hapus</a>
+                                <a href="controller/action/edit.php?nim=<?php echo $row['nim']; ?>" class="bg-gray-800 text-white px-3 py-1 rounded hover:bg-gray-700">Edit</a>
+                                <a href="controller/action/hapus.php?nim=<?php echo $row['nim']; ?>" onclick="return confirm('Yakin hapus data ini?')" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Hapus</a>
                             </td>
                         </tr>
                     <?php endwhile; ?>
