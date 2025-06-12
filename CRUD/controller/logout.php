@@ -1,6 +1,7 @@
 <?php
 session_start();
 session_destroy();
+include '../koneksi.php';
 
 // Jika Anda menggunakan cookie 'remember_me', hapus juga cookienya
 if (isset($_COOKIE['remember_me'])) {

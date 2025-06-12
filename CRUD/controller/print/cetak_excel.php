@@ -2,7 +2,7 @@
 header("Content-type: application/vnd-ms-excel");
 header("Content-Disposition: attachment; filename=data_mahasiswa.xls");
 
-include 'koneksi.php';
+include '../../koneksi.php';
 ?>
 
 <!DOCTYPE html>

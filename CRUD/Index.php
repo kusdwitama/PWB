@@ -37,9 +37,9 @@ if (!$result) die("Error: " . mysqli_error($conn));
     <h1 class="text-3xl font-semibold mb-6 text-gray-900">Data Mahasiswa</h1>
 
     <div class="flex flex-wrap gap-2 items-center justify-between mb-4">
-        <a href="controller/tambah.php" class="bg-gray-800 text-white text-sm px-4 py-2 rounded hover:bg-gray-700">Tambah</a>
+        <a href="controller/action/tambah.php" class="bg-gray-800 text-white text-sm px-4 py-2 rounded hover:bg-gray-700">Tambah</a>
         <button onclick="showPrintOptions()" class="bg-gray-800 text-white text-sm px-4 py-2 rounded hover:bg-gray-700">Print</button>
-        <a href="logout.php" class="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded">Logout</a>
+        <a href="controller/logout.php" class="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded">Logout</a>
     </div>
 
     <table class="w-full bg-white border border-gray-200 rounded-lg shadow-sm text-sm">
@@ -69,8 +69,8 @@ if (!$result) die("Error: " . mysqli_error($conn));
                         <td class="px-4 py-3 border-b border-gray-200"><?php echo $semester ?></td>
                         <td class="px-4 py-3 border-b border-gray-200"><?php echo $email ?></td>
                         <td class="px-4 py-3 border-b border-gray-200">
-                            <a href="controller/edit.php?nim=<?php echo $nim ?>" onclick="event.stopPropagation()" class="text-sm text-white bg-gray-800 px-3 py-1 rounded hover:bg-gray-700">Edit</a>
-                            <a href="controller/hapus.php?nim=<?php echo $nim ?>" onclick="event.stopPropagation(); return confirm('Yakin ingin menghapus data ini?')" class="text-sm text-white bg-red-600 px-3 py-1 rounded hover:bg-red-700">Hapus</a>
+                            <a href="controller/action/edit.php?nim=<?php echo $nim ?>" onclick="event.stopPropagation()" class="text-sm text-white bg-gray-800 px-3 py-1 rounded hover:bg-gray-700">Edit</a>
+                            <a href="controller/action/hapus.php?nim=<?php echo $nim ?>" onclick="event.stopPropagation(); return confirm('Yakin ingin menghapus data ini?')" class="text-sm text-white bg-red-600 px-3 py-1 rounded hover:bg-red-700">Hapus</a>
                         </td>
                     </tr>
                 <?php endwhile; ?>
@@ -112,8 +112,8 @@ if (!$result) die("Error: " . mysqli_error($conn));
         <div class="bg-white rounded-lg shadow-lg p-6 w-[300px]">
             <span class="float-right text-xl font-bold cursor-pointer text-gray-500 hover:text-gray-800" onclick="closePrintOptions()">&times;</span>
             <h2 class="text-xl font-semibold mb-4">Pilih Format Cetak</h2>
-            <p><a href="cetak_pdf.php" class="block w-full bg-gray-800 text-white text-center py-2 rounded hover:bg-gray-700 mb-2" target="_blank">Download PDF</a></p>
-            <p><a href="cetak_excel.php" class="block w-full bg-gray-800 text-white text-center py-2 rounded hover:bg-gray-700" target="_blank">Download Excel</a></p>
+            <p><a href="controller/print/cetak_pdf.php" class="block w-full bg-gray-800 text-white text-center py-2 rounded hover:bg-gray-700 mb-2" target="_blank">Download PDF</a></p>
+            <p><a href="controller/print/cetak_excel.php" class="block w-full bg-gray-800 text-white text-center py-2 rounded hover:bg-gray-700" target="_blank">Download Excel</a></p>
         </div>
     </div>
 

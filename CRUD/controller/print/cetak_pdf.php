@@ -1,6 +1,6 @@
 <?php
-require('fpdf/fpdf.php'); // Pastikan folder fpdf ada
-include 'koneksi.php';
+require('../../fpdf/fpdf.php'); // Pastikan folder fpdf ada
+include '../../koneksi.php';
 
 $pdf = new FPDF('P','mm','A4');
 $pdf->AddPage();

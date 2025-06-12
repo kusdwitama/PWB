@@ -1,10 +1,10 @@
 <?php
 session_start(); if (!isset($_SESSION['login'])) { header("Location:login.php"); exit; }
-include '../koneksi.php';
+include '../../koneksi.php';
 if (isset($_POST['submit'])) {
     $n=$_POST['nim']; $nm=$_POST['nama']; $pr=$_POST['prodi']; $sm=$_POST['semester']; $em=$_POST['email'];
     $q="INSERT INTO mahasiswa (nim,nama,prodi,semester,email) VALUES ('$n','$nm','$pr','$sm','$em')";
-    if (mysqli_query($conn,$q)) { header("Location:../index.php"); exit; }
+    if (mysqli_query($conn,$q)) { header("Location:../../index.php"); exit; }
     $err="Gagal menambahkan data.";
 }
 ?>
@@ -28,7 +28,7 @@ if (isset($_POST['submit'])) {
       <label class="block mb-1 text-gray-700">Email</label><input type="email" name="email" required class="w-full mb-6 px-3 py-2 border rounded">
       <div class="flex gap-4">
         <button type="submit" name="submit" class="flex-1 bg-gray-800 text-white py-2 rounded hover:bg-gray-700 transition">Tambah Data</button>
-        <a href="../index.php" class="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 text-center">Cancel</a>
+        <a href="../../index.php" class="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 text-center">Cancel</a>
       </div>
     </form>
   </div>
