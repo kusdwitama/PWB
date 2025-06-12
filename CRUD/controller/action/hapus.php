@@ -1,5 +1,5 @@
 <?php
-include '../koneksi.php';
+include '../../koneksi.php';
 
 if (isset($_GET['nim'])) {
   $nim = $_GET['nim'];
@@ -10,7 +10,7 @@ if (isset($_GET['nim'])) {
     echo "<p>Gagal menghapus data.</p>";
   }
 
-  header("Location: ../index.php"); // Redirect ke halaman index
+  header("Location: ../../index.php"); // Redirect ke halaman index
   exit;
 } else {
   echo "<p>Data tidak ditemukan.</p>";

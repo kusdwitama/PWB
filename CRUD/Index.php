@@ -4,24 +4,37 @@ if (!isset($_SESSION['login'])) {
     header("Location: login.php");
     exit;
 }
+
 include 'koneksi.php';
 
-$data_per_halaman = 5;
-$halaman_saat_ini = isset($_GET['halaman']) ? (int)$_GET['halaman'] : 1;
-if ($halaman_saat_ini <= 0) $halaman_saat_ini = 1;
+// Pagination setup
+$limit = 5;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
 
-$query_total = "SELECT COUNT(*) AS total FROM mahasiswa";
-$result_total = mysqli_query($conn, $query_total);
-if (!$result_total) die("Error: " . mysqli_error($conn));
+// Filter setup
+$where = [];
+if (!empty($_GET['nim_prefix'])) {
+    $nim_prefix = mysqli_real_escape_string($conn, $_GET['nim_prefix']);
+    $where[] = "nim LIKE '$nim_prefix%'";
+}
+if (!empty($_GET['prodi'])) {
+    $prodi = mysqli_real_escape_string($conn, $_GET['prodi']);
+    $where[] = "prodi = '$prodi'";
+}
+if (!empty($_GET['semester'])) {
+    $semester = (int)$_GET['semester'];
+    $where[] = "semester = $semester";
+}
+$whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
-$row_total = mysqli_fetch_assoc($result_total);
-$total_data = $row_total['total'];
-$total_halaman = ceil($total_data / $data_per_halaman);
-$offset = ($halaman_saat_ini - 1) * $data_per_halaman;
+// Hitung total data untuk pagination
+$totalQuery = mysqli_query($conn, "SELECT COUNT(*) as total FROM mahasiswa $whereSql");
+$totalRow = mysqli_fetch_assoc($totalQuery)['total'];
+$totalPages = ceil($totalRow / $limit);
 
-$sql = "SELECT * FROM mahasiswa LIMIT $data_per_halaman OFFSET $offset";
-$result = mysqli_query($conn, $sql);
-if (!$result) die("Error: " . mysqli_error($conn));
+// Ambil data
+$data = mysqli_query($conn, "SELECT * FROM mahasiswa $whereSql LIMIT $offset, $limit");
 ?>
 
 <!DOCTYPE html>
@@ -31,73 +44,97 @@ if (!$result) die("Error: " . mysqli_error($conn));
     <title>Data Mahasiswa</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans">
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-2xl font-bold">Data Mahasiswa</h1>
+            <div class="space-x-2">
+                <a href="controller/action/tambah.php" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Tambah</a>
+                <button onclick="showPrintOptions()" class="bg-gray-800 text-white text-sm px-4 py-2 rounded hover:bg-gray-700">Print</button>
+                <a href="controller/logout.php" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Logout</a>
+            </div>
+        </div>
 
-<div class="max-w-6xl mx-auto p-4">
-    <h1 class="text-3xl font-semibold mb-6 text-gray-900">Data Mahasiswa</h1>
+        <!-- Filter Form -->
+        <form method="GET" class="bg-white p-4 rounded shadow mb-6 flex flex-wrap gap-4">
+            <div>
+                <label class="block text-sm text-gray-700 mb-1">NIM Awalan</label>
+                <input type="text" name="nim_prefix" value="<?php echo @htmlspecialchars($_GET['nim_prefix']) ?>" placeholder="Contoh: G.311" class="border px-2 py-1 rounded">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-700 mb-1">Program Studi</label>
+                <select name="prodi" class="border px-2 py-1 rounded">
+                    <option value="">-- Semua --</option>
+                    <option <?php if (@$_GET['prodi'] == 'Teknik Informatika') echo 'selected'; ?>>Teknik Informatika</option>
+                    <option <?php if (@$_GET['prodi'] == 'Sistem Informasi') echo 'selected'; ?>>Sistem Informasi</option>
+                    <option <?php if (@$_GET['prodi'] == 'Ilmu Komunikasi') echo 'selected'; ?>>Ilmu Komunikasi</option>
+                    <option <?php if (@$_GET['prodi'] == 'Pariwisata') echo 'selected'; ?>>Pariwisata</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm text-gray-700 mb-1">Semester</label>
+                <select name="semester" class="border px-2 py-1 rounded">
+                    <option value="">-- Semua --</option>
+                    <?php for ($i = 1; $i <= 14; $i++): ?>
+                        <option value="<?= $i ?>" <?php if (@$_GET['semester'] == $i) echo 'selected'; ?>><?= $i ?></option>
+                    <?php endfor; ?>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Terapkan Filter</button>
+            </div>
+        </form>
 
-    <div class="flex flex-wrap gap-2 items-center justify-between mb-4">
-        <a href="controller/action/tambah.php" class="bg-gray-800 text-white text-sm px-4 py-2 rounded hover:bg-gray-700">Tambah</a>
-        <button onclick="showPrintOptions()" class="bg-gray-800 text-white text-sm px-4 py-2 rounded hover:bg-gray-700">Print</button>
-        <a href="controller/logout.php" class="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded">Logout</a>
-    </div>
-
-    <table class="w-full bg-white border border-gray-200 rounded-lg shadow-sm text-sm">
-        <thead>
-            <tr class="bg-gray-100 text-gray-700">
-                <th class="text-left px-4 py-3 border-b border-gray-300">NIM</th>
-                <th class="text-left px-4 py-3 border-b border-gray-300">Nama</th>
-                <th class="text-left px-4 py-3 border-b border-gray-300">Program Studi</th>
-                <th class="text-left px-4 py-3 border-b border-gray-300">Semester</th>
-                <th class="text-left px-4 py-3 border-b border-gray-300">Email</th>
-                <th class="text-left px-4 py-3 border-b border-gray-300">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if (mysqli_num_rows($result) > 0): ?>
-                <?php while ($row = mysqli_fetch_assoc($result)): 
-                    $nim = htmlspecialchars($row['nim']);
-                    $nama = htmlspecialchars($row['nama']);
-                    $prodi = htmlspecialchars($row['prodi']);
-                    $semester = htmlspecialchars($row['semester']);
-                    $email = htmlspecialchars($row['email']);
-                ?>
-                    <tr class="hover:bg-gray-50 cursor-pointer" onclick="showModal('<?php echo $nim ?>','<?php echo $nama ?>','<?php echo $prodi ?>','<?php echo $semester ?>','<?php echo $email ?>')">
-                        <td class="px-4 py-3 border-b border-gray-200"><?php echo $nim ?></td>
-                        <td class="px-4 py-3 border-b border-gray-200"><?php echo $nama ?></td>
-                        <td class="px-4 py-3 border-b border-gray-200"><?php echo $prodi ?></td>
-                        <td class="px-4 py-3 border-b border-gray-200"><?php echo $semester ?></td>
-                        <td class="px-4 py-3 border-b border-gray-200"><?php echo $email ?></td>
-                        <td class="px-4 py-3 border-b border-gray-200">
-                            <a href="controller/action/edit.php?nim=<?php echo $nim ?>" onclick="event.stopPropagation()" class="text-sm text-white bg-gray-800 px-3 py-1 rounded hover:bg-gray-700">Edit</a>
-                            <a href="controller/action/hapus.php?nim=<?php echo $nim ?>" onclick="event.stopPropagation(); return confirm('Yakin ingin menghapus data ini?')" class="text-sm text-white bg-red-600 px-3 py-1 rounded hover:bg-red-700">Hapus</a>
-                        </td>
+        <!-- Table -->
+        <div class="bg-white rounded shadow overflow-x-auto">
+            <table class="w-full table-auto text-left">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="p-3">NIM</th>
+                        <th class="p-3">Nama</th>
+                        <th class="p-3">Program Studi</th>
+                        <th class="p-3">Semester</th>
+                        <th class="p-3">Email</th>
+                        <th class="p-3">Action</th>
                     </tr>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <tr><td colspan="6" class="px-4 py-3 text-center text-gray-500">Data tidak ditemukan.</td></tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                    <?php while ($row = mysqli_fetch_assoc($data)): ?>
+                        <tr class="border-t hover:bg-gray-50 cursor-pointer" onclick="showModal('<?php echo $row['nim'] ?>', '<?php echo addslashes($row['nama']) ?>', '<?php echo addslashes($row['prodi']) ?>', '<?php echo $row['semester'] ?>', '<?php echo addslashes($row['email']) ?>')">
+                            <td class="p-3"><?php echo $row['nim']; ?></td>
+                            <td class="p-3"><?php echo $row['nama']; ?></td>
+                            <td class="p-3"><?php echo $row['prodi']; ?></td>
+                            <td class="p-3"><?php echo $row['semester']; ?></td>
+                            <td class="p-3"><?php echo $row['email']; ?></td>
+                            <td class="p-3 flex gap-2" onclick="event.stopPropagation()">
+                                <a href="edit.php?nim=<?php echo $row['nim']; ?>" class="bg-gray-800 text-white px-3 py-1 rounded hover:bg-gray-700">Edit</a>
+                                <a href="hapus.php?nim=<?php echo $row['nim']; ?>" onclick="return confirm('Yakin hapus data ini?')" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Hapus</a>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
 
-    <div class="flex justify-center items-center mt-6 gap-2">
-        <?php if ($halaman_saat_ini > 1): ?>
-            <a href="?halaman=<?php echo $halaman_saat_ini - 1 ?>" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-200">Previous</a>
-        <?php endif; ?>
-        <?php for ($i = 1; $i <= $total_halaman; $i++): ?>
-            <a href="?halaman=<?php echo $i ?>" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-200 <?php echo ($i == $halaman_saat_ini) ? 'bg-gray-800 text-white border-gray-800' : ''; ?>"><?php echo $i ?></a>
-        <?php endfor; ?>
-        <?php if ($halaman_saat_ini < $total_halaman): ?>
-            <a href="?halaman=<?php echo $halaman_saat_ini + 1 ?>" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-200">Next</a>
-        <?php endif; ?>
+        <!-- Pagination -->
+        <div class="flex justify-center mt-6 space-x-1">
+            <?php $params = $_GET; ?>
+            <?php if ($page > 1): $params['page'] = $page - 1; ?>
+                <a href="?<?php echo http_build_query($params); ?>" class="px-3 py-1 border rounded bg-white hover:bg-gray-200">Prev</a>
+            <?php endif; ?>
+            <?php for ($i = 1; $i <= $totalPages; $i++): $params['page'] = $i; ?>
+                <a href="?<?php echo http_build_query($params); ?>" class="px-3 py-1 border rounded <?php echo ($i == $page) ? 'bg-gray-800 text-white' : 'bg-white hover:bg-gray-200'; ?>"><?php echo $i; ?></a>
+            <?php endfor; ?>
+            <?php if ($page < $totalPages): $params['page'] = $page + 1; ?>
+                <a href="?<?php echo http_build_query($params); ?>" class="px-3 py-1 border rounded bg-white hover:bg-gray-200">Next</a>
+            <?php endif; ?>
+        </div>
     </div>
 
-    <?php mysqli_close($conn); ?>
-
-    <!-- Modal Detail -->
+    <!-- Modal Detail Mahasiswa -->
     <div id="myModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-            <span class="float-right text-xl font-bold cursor-pointer text-gray-500 hover:text-gray-800" onclick="closeModal()">&times;</span>
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+            <span class="absolute top-3 right-4 text-xl font-bold cursor-pointer text-gray-500 hover:text-gray-800" onclick="closeModal()">&times;</span>
             <h2 class="text-xl font-semibold mb-4">Detail Mahasiswa</h2>
             <p><strong>NIM:</strong> <span id="modal-nim"></span></p>
             <p><strong>Nama:</strong> <span id="modal-nama"></span></p>
@@ -109,11 +146,11 @@ if (!$result) die("Error: " . mysqli_error($conn));
 
     <!-- Modal Print -->
     <div id="printModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-[300px]">
-            <span class="float-right text-xl font-bold cursor-pointer text-gray-500 hover:text-gray-800" onclick="closePrintOptions()">&times;</span>
+        <div class="bg-white rounded-lg shadow-lg p-6 w-[300px] relative">
+            <span class="absolute top-3 right-4 text-xl font-bold cursor-pointer text-gray-500 hover:text-gray-800" onclick="closePrintOptions()">&times;</span>
             <h2 class="text-xl font-semibold mb-4">Pilih Format Cetak</h2>
-            <p><a href="controller/print/cetak_pdf.php" class="block w-full bg-gray-800 text-white text-center py-2 rounded hover:bg-gray-700 mb-2" target="_blank">Download PDF</a></p>
-            <p><a href="controller/print/cetak_excel.php" class="block w-full bg-gray-800 text-white text-center py-2 rounded hover:bg-gray-700" target="_blank">Download Excel</a></p>
+            <a href="controller/print/cetak_pdf.php" target="_blank" class="block bg-gray-800 text-white text-center py-2 rounded hover:bg-gray-700 mb-2">Download PDF</a>
+            <a href="controller/print/cetak_excel.php" target="_blank" class="block bg-gray-800 text-white text-center py-2 rounded hover:bg-gray-700">Download Excel</a>
         </div>
     </div>
 
@@ -144,7 +181,5 @@ if (!$result) die("Error: " . mysqli_error($conn));
             if (event.target.id === "printModal") closePrintOptions();
         }
     </script>
-</div>
-
 </body>
 </html>

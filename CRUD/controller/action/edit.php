@@ -1,6 +1,6 @@
 <?php
 session_start(); if (!isset($_SESSION['login'])) { header("Location:login.php"); exit; }
-include '../koneksi.php';
+include '../../koneksi.php';
 if (isset($_GET['nim'])) {
     $n=$_GET['nim'];
     $r=mysqli_query($conn,"SELECT * FROM mahasiswa WHERE nim='$n'");
@@ -11,7 +11,7 @@ if (isset($_POST['submit'])) {
     $n=$_POST['nim']; $nm=$_POST['nama']; $pr=$_POST['prodi']; $sm=$_POST['semester']; $em=$_POST['email'];
     $q="UPDATE mahasiswa SET nama='$nm',prodi='$pr',semester='$sm',email='$em' WHERE nim='$n'";
     mysqli_query($conn,$q);
-    header("Location:../index.php"); exit;
+    header("Location:../../index.php"); exit;
 }
 ?>
 <!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Edit Mahasiswa</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-100 flex items-center justify-center min-h-screen">
@@ -34,8 +34,9 @@ if (isset($_POST['submit'])) {
       <label class="block mb-1 text-gray-700">Email</label><input type="email" name="email" value="<?php echo htmlspecialchars($m['email']) ?>" required class="w-full mb-6 px-3 py-2 border rounded">
       <div class="flex gap-4">
         <button type="submit" name="submit" class="flex-1 bg-gray-800 text-white py-2 rounded hover:bg-gray-700 transition">Update</button>
-        <a href="../index.php" class="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 text-center">Cancel</a>
+        <a href="../../index.php" class="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 text-center">Cancel</a>
       </div>
     </form>
   </div>
 </body></html>
+          
